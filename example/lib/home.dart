@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:moblink/moblink.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  HomePage({Key? key, this.title}) : super(key: key);
+  final String? title;
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   //app存在后台时候的还原
-  void _onEvent(Object event) {
+  void _onEvent(dynamic event) {
     print('返回的内容: $event');
     if (null != event) {
       showAlert('要还原的路径为[活着]：$event', context);
@@ -181,8 +181,8 @@ class _HomePageState extends State<HomePage> {
   /// POLICY_TYPE_URL = 1
   /// POLICY_TYPE_TXT = 2
   void getPrivacyPolicyUrl(BuildContext context) {
-    Moblink.getPrivacyPolicy("1", (Map data, Map error) {
-      String policyData, errorStr;
+    Moblink.getPrivacyPolicy("1", (dynamic data, dynamic error) {
+      String policyData = '', errorStr = '';
 
       print("==============>getPrivacyPolicyUrl ");
       if (data != null) {
@@ -228,7 +228,7 @@ class _HomePageState extends State<HomePage> {
     int PositiveBtnColorId = 1002;
     int setNegativeBtnColorId = 1003;
 
-    List<int> operationButtonColors = new List<int>();
+    List<int> operationButtonColors = <int>[];
     operationButtonColors.add(PositiveBtnColorId);
     operationButtonColors.add(setNegativeBtnColorId);
   }

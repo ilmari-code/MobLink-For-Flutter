@@ -1,34 +1,35 @@
-package com.example.moblink;
+package com.mob.flutter.moblink;
 
 import android.app.Activity;
 import android.os.Handler;
-import android.text.Html;
-import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.mob.MobSDK;
-import com.mob.PrivacyPolicy;
+import com.mob.commons.MOBLINK;
 import com.mob.moblink.ActionListener;
 import com.mob.moblink.MobLink;
 import com.mob.moblink.RestoreSceneListener;
 import com.mob.moblink.Scene;
 import com.mob.moblink.SceneRestorable;
 import com.mob.tools.utils.Hashon;
-import com.mob.tools.utils.SharePrefrenceHelper;
 
 import java.util.HashMap;
 
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 
 /**
  * MoblinkPlugin
  */
-public class MoblinkPlugin extends Object implements MethodCallHandler, SceneRestorable {
+public class MoblinkPlugin extends Object implements FlutterPlugin,MethodCallHandler, ActivityAware ,SceneRestorable {
     private static final String getMobId = "getMobId";
     private static final String restoreScene = "restoreScene";
 
@@ -37,10 +38,70 @@ public class MoblinkPlugin extends Object implements MethodCallHandler, SceneRes
     private static boolean ismEventSinkNotNull;
     private static Activity activity;
     private static HashMap<String, Object> onReturnSceneDataMap;
+    private MethodChannel channel;
+    private EventChannel eventChannel;
 
-    public MoblinkPlugin(Activity activity) {
+    public MoblinkPlugin() {
         //场景还原监听
         MobLink.setRestoreSceneListener(new SceneListener());
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        try {
+            Log.e("WWW", " registerWith[注册过来回传监听的回掉]==");
+            //setChannelId
+            MobSDK.setChannel(new MOBLINK(), MobSDK.CHANNEL_FLUTTER);
+            channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "com.yoozoo.mob/moblink");
+            channel.setMethodCallHandler(this);
+            eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), EventChannel);
+            eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+                @Override
+                public void onListen(Object o, EventChannel.EventSink eventSink) {
+                    Log.e("WWW", " registerWith(onListen)[接受到回掉]==");
+                    mEventSink = eventSink;
+                    if (ismEventSinkNotNull) {
+                        Log.e("WWW", " registerWith[onListen]==开始回调了传递数据了");
+                        ismEventSinkNotNull = false;
+                        restoreScene();
+                    }
+                }
+
+                @Override
+                public void onCancel(Object o) {
+
+                }
+            });
+        }catch (Throwable throwable){
+        };
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        try {
+            channel.setMethodCallHandler(null);
+            eventChannel.setStreamHandler(null);
+        }catch (Throwable throwable){}
+    }
+
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
+        activity = activityPluginBinding.getActivity();
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding activityPluginBinding) {
+        onAttachedToActivity(activityPluginBinding);
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+
     }
 
     //Java代码
@@ -89,63 +150,65 @@ public class MoblinkPlugin extends Object implements MethodCallHandler, SceneRes
 
     private void queryPrivacy() {
         // 异步方法
-        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_URL, new PrivacyPolicy.OnPolicyListener() {
-            @Override
-            public void onComplete(PrivacyPolicy data) {
-                if (data != null) {
-                    // 富文本内容
-                    String text = data.getContent();
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                // 请求失败
-                //Log.e(TAG, "隐私协议查询结果：失败 " + t);
-            }
-        });
+//        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_URL, new PrivacyPolicy.OnPolicyListener() {
+//            @Override
+//            public void onComplete(PrivacyPolicy data) {
+//                if (data != null) {
+//                    // 富文本内容
+//                    String text = data.getContent();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                // 请求失败
+//                //Log.e(TAG, "隐私协议查询结果：失败 " + t);
+//            }
+//        });
     }
 
     /**
      * Plugin registration.
      */
-    public static void registerWith(Registrar registrar) {
-        Log.e("WWW", " registerWith[注册过来回传监听的回掉]==");
-
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.yoozoo.mob/moblink");
-        channel.setMethodCallHandler(new MoblinkPlugin(registrar.activity()));
-        activity = registrar.activity();
-        final EventChannel eventChannel = new EventChannel(registrar.messenger(), EventChannel);
-        eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
-            @Override
-            public void onListen(Object o, EventChannel.EventSink eventSink) {
-                Log.e("WWW", " registerWith(onListen)[接受到回掉]==");
-                mEventSink = eventSink;
-                if (ismEventSinkNotNull) {
-                    Log.e("WWW", " registerWith[onListen]==开始回调了传递数据了");
-                    ismEventSinkNotNull = false;
-                    restoreScene();
-                }
-            }
-
-            @Override
-            public void onCancel(Object o) {
-
-            }
-        });
-    }
+//    public static void registerWith(Registrar registrar) {
+//        Log.e("WWW", " registerWith[注册过来回传监听的回掉]==");
+//
+//        final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.yoozoo.mob/moblink");
+//        channel.setMethodCallHandler(new MoblinkPlugin(registrar.activity()));
+//        activity = registrar.activity();
+//        final EventChannel eventChannel = new EventChannel(registrar.messenger(), EventChannel);
+//        eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+//            @Override
+//            public void onListen(Object o, EventChannel.EventSink eventSink) {
+//                Log.e("WWW", " registerWith(onListen)[接受到回掉]==");
+//                mEventSink = eventSink;
+//                if (ismEventSinkNotNull) {
+//                    Log.e("WWW", " registerWith[onListen]==开始回调了传递数据了");
+//                    ismEventSinkNotNull = false;
+//                    restoreScene();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancel(Object o) {
+//
+//            }
+//        });
+//    }
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
-        MobLink.setActivityDelegate(activity, MoblinkPlugin.this);
-        switch (call.method) {
-            case getMobId:
-                getMobId(call, result);
-                break;
-            case restoreScene:
-                restoreScene(result);
-                break;
-        }
+        try {
+            MobLink.setActivityDelegate(activity, MoblinkPlugin.this);
+            switch (call.method) {
+                case getMobId:
+                    getMobId(call, result);
+                    break;
+                case restoreScene:
+                    restoreScene(result);
+                    break;
+            }
+        }catch (Throwable throwable){}
     }
 
     private void getMobId(MethodCall call, final Result result) {
@@ -168,6 +231,7 @@ public class MoblinkPlugin extends Object implements MethodCallHandler, SceneRes
                 result.success(resposon);
             }
 
+            @Override
             public void onError(Throwable throwable) {
                 result.error(throwable.getMessage().toString(), null, null);
             }

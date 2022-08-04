@@ -1,18 +1,17 @@
-group 'com.example.moblink'
+group 'com.mob.flutter.moblink'
 version '1.0-SNAPSHOT'
 
 buildscript {
     repositories {
         google()
         jcenter()
-        maven {
-            url "http://mvn.mob.com/android"
-        }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
-        classpath 'com.mob.sdk:MobSDK:+'
+    }
+    configurations.all {
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
     }
 }
 
@@ -20,22 +19,10 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "http://mvn.mob.com/android"
-        }
     }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.mob.sdk'
-
-MobSDK {
-
-
-    MobLink {
-
-    }
-}
 
 android {
     compileSdkVersion 27
@@ -48,3 +35,8 @@ android {
         disable 'InvalidPackage'
     }
 }
+
+dependencies {
+    compileOnly fileTree(include: ['*.jar','*.aar'], dir: 'libs',excludes: [])
+}
+

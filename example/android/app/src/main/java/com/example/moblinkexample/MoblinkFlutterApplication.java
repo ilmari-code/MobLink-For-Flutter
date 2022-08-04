@@ -1,6 +1,6 @@
 package com.example.moblinkexample;
 
-import com.example.moblink.MoblinkPlugin;
+import com.mob.flutter.moblink.MoblinkPlugin;
 import com.mob.moblink.MobLink;
 
 import io.flutter.app.FlutterApplication;

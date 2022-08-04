@@ -2,9 +2,10 @@ package com.example.moblinkexample;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.mob.MobSDK;
 import com.mob.OperationCallback;
@@ -12,25 +13,29 @@ import com.mob.PrivacyPolicy;
 import com.mob.moblink.MobLink;
 
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugins.GeneratedPluginRegistrant;
-
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
 
-    private static final String METHOD_CHANNEL = "private.flutter.io/method_channel";
-    private static final String METHOD_CHANNEL_SUBMIT_PRIVATE = "private.flutter.io/method_channel_submit_private";
+    public static final String METHOD_CHANNEL = "private.flutter.io/method_channel";
+    public static final String METHOD_CHANNEL_SUBMIT_PRIVATE = "private.flutter.io/method_channel_submit_private";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        GeneratedPluginRegistrant.registerWith(this);
+    }
 
-        new MethodChannel(getFlutterView(), METHOD_CHANNEL).setMethodCallHandler(
+    @Override
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
+
+        new MethodChannel(getFlutterEngine().getDartExecutor().getBinaryMessenger(), METHOD_CHANNEL).setMethodCallHandler(
                 new MethodCallHandler() {
                     @Override
                     public void onMethodCall(MethodCall call, Result result) {
@@ -49,7 +54,7 @@ public class MainActivity extends FlutterActivity {
                 }
         );
 
-        new MethodChannel(getFlutterView(), METHOD_CHANNEL_SUBMIT_PRIVATE).setMethodCallHandler(
+        new MethodChannel(getFlutterEngine().getDartExecutor().getBinaryMessenger(), METHOD_CHANNEL_SUBMIT_PRIVATE).setMethodCallHandler(
                 new MethodCallHandler() {
                     @Override
                     public void onMethodCall(MethodCall call, Result result) {
@@ -70,22 +75,22 @@ public class MainActivity extends FlutterActivity {
      */
     String text = null;
     private String getPrivateContent(int i) {
-        MobSDK.getPrivacyPolicyAsync(i, new PrivacyPolicy.OnPolicyListener() {
-            @Override
-            public void onComplete(PrivacyPolicy data) {
-                if (data != null) {
-                    // 富文本内容
-                    text = data.getContent();
-                    Log.e("WWW", " 隐私协议内通==" + text);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                // 请求失败
-                //Log.e(TAG, "隐私协议查询结果：失败 " + t);
-            }
-        });
+//        MobSDK.getPrivacyPolicyAsync(i, new PrivacyPolicy.OnPolicyListener() {
+//            @Override
+//            public void onComplete(PrivacyPolicy data) {
+//                if (data != null) {
+//                    // 富文本内容
+//                    text = data.getContent();
+//                    Log.e("WWW", " 隐私协议内通==" + text);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                // 请求失败
+//                //Log.e(TAG, "隐私协议查询结果：失败 " + t);
+//            }
+//        });
         return text;
     }
 
