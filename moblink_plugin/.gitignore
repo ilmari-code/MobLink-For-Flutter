@@ -1,0 +1,12 @@
+.DS_Store
+.metadata
+.dart_tool/
+.idea/
+.vscode/
+.packages
+.pub/
+pubspec.lock
+.css
+.html
+
+build/
