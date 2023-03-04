@@ -23,7 +23,7 @@ class Moblink {
 
     MLSDKScene scenes = new MLSDKScene(event["path"] ?? "", event["params"]);
     scenes.mobid = event["mobid"] ?? "";
-    scenes.className = event["className"];
+    scenes.className = event["className"] ?? "";
     scenes.rawURL = event["rawURL"];
     moblinkCallBack!(scenes);
   }
